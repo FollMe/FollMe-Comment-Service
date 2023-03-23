@@ -1,16 +1,15 @@
 package server
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
 func Route() {
+	app := NewApp()
+
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/health-check", func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode("Tui oke nha")
-	}).Methods("GET")
-	http.ListenAndServe(":3000", router)
+	router.HandleFunc("/comments/{postId}", app.CmtHandler.GetCommentsOfPost).Methods("GET")
+	http.ListenAndServe(":3002", router)
 }

@@ -10,7 +10,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func ConnectDB() {
+func ConnectDB() *sql.DB {
 	// Load variables from .env
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -39,4 +39,5 @@ func ConnectDB() {
 		log.Fatal(pingErr)
 	}
 	fmt.Println("Connect DB successfully!")
+	return db
 }
