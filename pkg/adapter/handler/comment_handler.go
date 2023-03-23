@@ -23,16 +23,18 @@ func (h CmtHandler) GetCommentsOfPost(w http.ResponseWriter, r *http.Request) {
 	postId := mux.Vars(r)["postId"]
 	cmts, err := h.cmtSvc.GetCommentsOfPost(r.Context(), postId)
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(
 			serializer.NewFailHttpRes(""),
 		)
+		return
 	}
 
 	cmtsRes := []serializer.Comment{}
 	for _, cmt := range cmts {
 		cmtRes := serializer.Comment{
 			ID:        cmt.ID(),
-			PostID:    cmt.PostID(),
+			PostSlug:  cmt.PostSlug(),
 			Author:    cmt.Author(),
 			Content:   cmt.Content(),
 			CreatedAt: *cmt.CreatedAt(),
@@ -58,9 +60,11 @@ func (h CmtHandler) GetCommentsOfPost(w http.ResponseWriter, r *http.Request) {
 	}
 	httpRes, err := json.Marshal(serializer.NewSuccessHttpRes("", dataRes))
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(
 			serializer.NewFailHttpRes(""),
 		)
+		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(httpRes)

@@ -7,7 +7,7 @@ import (
 
 type Comment struct {
 	id        int
-	postID    string
+	postSlug  string
 	replies   []Comment
 	author    string
 	content   string
@@ -18,8 +18,8 @@ type Comment struct {
 func (c Comment) ID() int {
 	return c.id
 }
-func (c Comment) PostID() string {
-	return c.postID
+func (c Comment) PostSlug() string {
+	return c.postSlug
 }
 func (c Comment) Replies() []Comment {
 	return c.replies
@@ -51,13 +51,13 @@ type CommentSvc interface {
 
 type ListOpts struct {
 	ParentID int
-	PostID   string
+	PostSlug string
 }
 
 type CommentFactoryOpts struct {
 	ID        int
-	PostID    string
-	Replies   []Comment `json:"author"`
+	PostSlug  string
+	Replies   []Comment
 	Author    string
 	Content   string
 	CreatedAt *time.Time
@@ -67,7 +67,7 @@ type CommentFactoryOpts struct {
 func CommentFactory(co CommentFactoryOpts) *Comment {
 	rp := Comment{
 		id:        co.ID,
-		postID:    co.PostID,
+		postSlug:  co.PostSlug,
 		replies:   co.Replies,
 		author:    co.Author,
 		content:   co.Content,

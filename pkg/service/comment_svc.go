@@ -17,8 +17,8 @@ func NewCommentSvc(repo model.CommentRepo) *CommentSvc {
 
 var _ model.CommentSvc = &CommentSvc{}
 
-func (c CommentSvc) GetCommentsOfPost(ctx context.Context, postId string) ([]model.Comment, error) {
+func (c CommentSvc) GetCommentsOfPost(ctx context.Context, postSlug string) ([]model.Comment, error) {
 	return c.repo.List(ctx, model.ListOpts{
-		PostID: postId,
+		PostSlug: postSlug,
 	})
 }

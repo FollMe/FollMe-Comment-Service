@@ -1,6 +1,7 @@
 package server
 
 import (
+	"follme/comment-service/pkg/middleware"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -10,6 +11,8 @@ func Route() {
 	app := NewApp()
 
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/comments/{postId}", app.CmtHandler.GetCommentsOfPost).Methods("GET")
-	http.ListenAndServe(":3002", router)
+	const BaseUrl = "/comment-svc/api"
+	router.Use(middleware.AuthenticationMiddleware)
+	router.HandleFunc(BaseUrl+"/comments/{postId}", app.CmtHandler.GetCommentsOfPost).Methods("GET")
+	http.ListenAndServe(":3001", router)
 }

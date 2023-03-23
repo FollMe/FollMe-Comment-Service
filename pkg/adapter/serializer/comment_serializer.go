@@ -4,7 +4,7 @@ import "time"
 
 type Comment struct {
 	ID        int        `json:"id"`
-	PostID    string     `json:"postID,omitempty"`
+	PostSlug  string     `json:"postSlug,omitempty"`
 	Author    string     `json:"author"`
 	Content   string     `json:"content"`
 	Replies   []Comment  `json:"replies,omitempty"`

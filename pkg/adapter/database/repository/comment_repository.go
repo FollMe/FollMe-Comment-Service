@@ -10,7 +10,7 @@ import (
 
 type comment struct {
 	ID        int
-	PostID    string
+	PostSlug  string
 	ParentID  *int
 	Author    string
 	Content   string
@@ -20,7 +20,6 @@ type comment struct {
 
 type replyComment struct {
 	ID        *int
-	PostID    *string
 	ParentID  *int
 	Author    *string
 	Content   *string
@@ -43,7 +42,7 @@ var _ model.CommentRepo = &CommentRepo{}
 func (c comment) toModel() *model.Comment {
 	return model.CommentFactory(model.CommentFactoryOpts{
 		ID:        c.ID,
-		PostID:    c.PostID,
+		PostSlug:  c.PostSlug,
 		Author:    c.Author,
 		Content:   c.Content,
 		CreatedAt: c.CreatedAt,
@@ -63,14 +62,14 @@ func (c replyComment) toModel() *model.Comment {
 
 func (c CommentRepo) List(ctx context.Context, opts model.ListOpts) ([]model.Comment, error) {
 	query := `
-		select c.id, c.post_id, c.author, c.content, c.created_at, c.updated_at,
+		select c.id, c.post_slug, c.author, c.content, c.created_at, c.updated_at,
 		rc.id, rc.author, rc.content, rc.created_at, rc.updated_at
 		from comment c left join comment rc on c.id = rc.parent_id
-		where c.post_id = $1 and c.parent_id is null
+		where c.post_slug = $1 and c.parent_id is null
 		order by c.id ASC, rc.id ASC 
 	`
 	cmts := []model.Comment{}
-	rows, err := c.DB.Query(query, opts.PostID)
+	rows, err := c.DB.Query(query, opts.PostSlug)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +81,7 @@ func (c CommentRepo) List(ctx context.Context, opts model.ListOpts) ([]model.Com
 			replyCmt replyComment
 		)
 		err := rows.Scan(
-			&cmt.ID, &cmt.PostID, &cmt.Author, &cmt.Content, &cmt.CreatedAt, &cmt.UpdatedAt,
+			&cmt.ID, &cmt.PostSlug, &cmt.Author, &cmt.Content, &cmt.CreatedAt, &cmt.UpdatedAt,
 			&replyCmt.ID, &replyCmt.Author, &replyCmt.Content, &replyCmt.CreatedAt, &replyCmt.UpdatedAt,
 		)
 		if err != nil {
