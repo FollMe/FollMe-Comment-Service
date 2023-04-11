@@ -1,6 +1,8 @@
 package serializer
 
-import "time"
+import (
+	"time"
+)
 
 type Comment struct {
 	ID        int        `json:"id"`
@@ -14,4 +16,10 @@ type Comment struct {
 
 type GetCommentsOfPostRes struct {
 	Comments []Comment `json:"comments"`
+}
+
+type CreateCommentOfPostReq struct {
+	PostSlug string `json:"postSlug" validate:"required"`
+	ParentId *int   `json:"parentId,omitempty" validate:"omitempty,number"`
+	Content  string `json:"content" validate:"required"`
 }

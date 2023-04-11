@@ -8,10 +8,11 @@ import (
 type Comment struct {
 	id        int
 	postSlug  string
+	parentId  *int
 	replies   []Comment
 	author    string
 	content   string
-	createdAt *time.Time
+	createdAt time.Time
 	updatedAt *time.Time
 }
 
@@ -20,6 +21,9 @@ func (c Comment) ID() int {
 }
 func (c Comment) PostSlug() string {
 	return c.postSlug
+}
+func (c Comment) ParentID() *int {
+	return c.parentId
 }
 func (c Comment) Replies() []Comment {
 	return c.replies
@@ -30,7 +34,7 @@ func (c Comment) Author() string {
 func (c Comment) Content() string {
 	return c.content
 }
-func (c Comment) CreatedAt() *time.Time {
+func (c Comment) CreatedAt() time.Time {
 	return c.createdAt
 }
 func (c Comment) UpdatedAt() *time.Time {
@@ -43,10 +47,12 @@ func (c *Comment) AppendReply(replyCmt Comment) {
 
 type CommentRepo interface {
 	List(ctx context.Context, opts ListOpts) ([]Comment, error)
+	CreateOne(ctx context.Context, opts Comment) (*Comment, error)
 }
 
 type CommentSvc interface {
 	GetCommentsOfPost(ctx context.Context, postId string) ([]Comment, error)
+	InsertCommentOfPost(ctx context.Context, opts CreateCommentOpts) (*Comment, error)
 }
 
 type ListOpts struct {
@@ -71,9 +77,27 @@ func CommentFactory(co CommentFactoryOpts) *Comment {
 		replies:   co.Replies,
 		author:    co.Author,
 		content:   co.Content,
-		createdAt: co.CreatedAt,
+		createdAt: *co.CreatedAt,
 		updatedAt: co.UpdatedAt,
 	}
 
 	return &rp
+}
+
+type CreateCommentOpts struct {
+	PostSlug string
+	ParentId *int
+	Content  string
+	Author   string
+}
+
+func NewComment(opts CreateCommentOpts) *Comment {
+	now := time.Now()
+	return &Comment{
+		postSlug:  opts.PostSlug,
+		parentId:  opts.ParentId,
+		content:   opts.Content,
+		author:    opts.Author,
+		createdAt: now,
+	}
 }

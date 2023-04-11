@@ -13,8 +13,8 @@ import (
 func AuthenticationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		userInfos := req.Header["X-User-Info"]
+		w.Header().Set("Content-Type", "application/json")
 		if len(userInfos) <= 0 {
-			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(
 				serializer.NewFailHttpRes("Vui lòng đăng nhập"),
@@ -24,7 +24,11 @@ func AuthenticationMiddleware(next http.Handler) http.Handler {
 
 		decodeInfo, _ := base64.StdEncoding.DecodeString(userInfos[0])
 		user := model.User{}
-		json.Unmarshal(decodeInfo, &user)
+		err := json.Unmarshal(decodeInfo, &user)
+		if err != nil {
+			panic(err)
+		}
+
 		reqContext := context.WithValue(req.Context(), "UserInfo", &user)
 		req = req.WithContext(reqContext)
 		next.ServeHTTP(w, req)

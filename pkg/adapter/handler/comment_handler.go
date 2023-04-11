@@ -37,7 +37,7 @@ func (h CmtHandler) GetCommentsOfPost(w http.ResponseWriter, r *http.Request) {
 			PostSlug:  cmt.PostSlug(),
 			Author:    cmt.Author(),
 			Content:   cmt.Content(),
-			CreatedAt: *cmt.CreatedAt(),
+			CreatedAt: cmt.CreatedAt(),
 			UpdatedAt: cmt.UpdatedAt(),
 		}
 		replyCmtRes := []serializer.Comment{}
@@ -46,7 +46,7 @@ func (h CmtHandler) GetCommentsOfPost(w http.ResponseWriter, r *http.Request) {
 				ID:        replyCmt.ID(),
 				Author:    replyCmt.Author(),
 				Content:   replyCmt.Content(),
-				CreatedAt: *replyCmt.CreatedAt(),
+				CreatedAt: replyCmt.CreatedAt(),
 				UpdatedAt: replyCmt.UpdatedAt(),
 			})
 		}
@@ -66,6 +66,49 @@ func (h CmtHandler) GetCommentsOfPost(w http.ResponseWriter, r *http.Request) {
 		)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
+
 	w.Write(httpRes)
+}
+
+func (h CmtHandler) CreateCommentsOfPost(w http.ResponseWriter, r *http.Request) {
+	var req serializer.CreateCommentOfPostReq
+	err := json.NewDecoder(r.Body).Decode(&req)
+	defer r.Body.Close()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(
+			serializer.NewFailHttpRes(""),
+		)
+		return
+	}
+
+	err = serializer.Validate(req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(
+			serializer.NewFailHttpRes("Invalid request body"),
+		)
+		return
+	}
+
+	user := r.Context().Value("UserInfo").(*model.User)
+
+	_, err = h.cmtSvc.InsertCommentOfPost(r.Context(), model.CreateCommentOpts{
+		PostSlug: req.PostSlug,
+		ParentId: req.ParentId,
+		Content:  req.Content,
+		Author:   user.ID,
+	})
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(
+			serializer.NewFailHttpRes(""),
+		)
+		return
+	}
+
+	json.NewEncoder(w).Encode(
+		serializer.NewSuccessHttpRes("Post comment successful", nil),
+	)
 }

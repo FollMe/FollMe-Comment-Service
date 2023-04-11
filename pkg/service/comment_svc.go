@@ -22,3 +22,8 @@ func (c CommentSvc) GetCommentsOfPost(ctx context.Context, postSlug string) ([]m
 		PostSlug: postSlug,
 	})
 }
+
+func (c CommentSvc) InsertCommentOfPost(ctx context.Context, opts model.CreateCommentOpts) (*model.Comment, error) {
+	cmt := model.NewComment(opts)
+	return c.repo.CreateOne(ctx, *cmt)
+}
