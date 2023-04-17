@@ -23,11 +23,7 @@ func (h CmtHandler) GetCommentsOfPost(w http.ResponseWriter, r *http.Request) {
 	postId := mux.Vars(r)["postId"]
 	cmts, err := h.cmtSvc.GetCommentsOfPost(r.Context(), postId)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(
-			serializer.NewFailHttpRes(""),
-		)
-		return
+		panic(err)
 	}
 
 	cmtsRes := []serializer.Comment{}
@@ -55,19 +51,11 @@ func (h CmtHandler) GetCommentsOfPost(w http.ResponseWriter, r *http.Request) {
 		cmtsRes = append(cmtsRes, cmtRes)
 	}
 
-	dataRes := serializer.GetCommentsOfPostRes{
-		Comments: cmtsRes,
-	}
-	httpRes, err := json.Marshal(serializer.NewSuccessHttpRes("", dataRes))
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(
-			serializer.NewFailHttpRes(""),
-		)
-		return
-	}
-
-	w.Write(httpRes)
+	json.NewEncoder(w).Encode(
+		serializer.NewSuccessHttpRes("", serializer.GetCommentsOfPostRes{
+			Comments: cmtsRes,
+		}),
+	)
 }
 
 func (h CmtHandler) CreateCommentsOfPost(w http.ResponseWriter, r *http.Request) {
@@ -75,11 +63,7 @@ func (h CmtHandler) CreateCommentsOfPost(w http.ResponseWriter, r *http.Request)
 	err := json.NewDecoder(r.Body).Decode(&req)
 	defer r.Body.Close()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(
-			serializer.NewFailHttpRes(""),
-		)
-		return
+		panic(err)
 	}
 
 	err = serializer.Validate(req)
@@ -101,11 +85,7 @@ func (h CmtHandler) CreateCommentsOfPost(w http.ResponseWriter, r *http.Request)
 	})
 
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(
-			serializer.NewFailHttpRes(""),
-		)
-		return
+		panic(err)
 	}
 
 	json.NewEncoder(w).Encode(
