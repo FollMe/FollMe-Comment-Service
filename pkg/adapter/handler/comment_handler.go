@@ -66,14 +66,7 @@ func (h CmtHandler) CreateCommentsOfPost(w http.ResponseWriter, r *http.Request)
 		panic(err)
 	}
 
-	err = serializer.Validate(req)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(
-			serializer.NewFailHttpRes("Invalid request body"),
-		)
-		return
-	}
+	serializer.ValidateOrPanic(w, req)
 
 	user := r.Context().Value("UserInfo").(*model.User)
 
