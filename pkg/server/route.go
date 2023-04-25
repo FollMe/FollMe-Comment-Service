@@ -17,5 +17,5 @@ func Route() {
 	router.HandleFunc(BaseUrl+"/comments/{postId}", app.CmtHandler.GetCommentsOfPost).Methods("GET")
 	router.HandleFunc(BaseUrl+"/comments", app.CmtHandler.CreateCommentsOfPost).Methods("POST")
 
-	http.ListenAndServe(":3001", router)
+	http.ListenAndServe(":3000", router)
 }

@@ -13,8 +13,8 @@ import (
 func ConnectDB() *sql.DB {
 	// Load variables from .env
 	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	if err == nil {
+		log.Print("Loading variable from .env file")
 	}
 	var (
 		host     = os.Getenv("DB_HOST")
