@@ -16,7 +16,7 @@ func Route() {
 	router.Use(middleware.FilterPanicMiddleware)
 	router.HandleFunc(BaseUrl+"/comments/{postId}", app.CmtHandler.GetCommentsOfPost).Methods("GET")
 	router.HandleFunc(BaseUrl+"/comments", app.CmtHandler.CreateCommentsOfPost).Methods("POST")
-	router.HandleFunc(BaseUrl+"/ws", app.CmtHandler.StartWSConnection).Methods("GET")
+	router.HandleFunc("/comment-svc/ws", app.CmtHandler.StartWSConnection).Methods("GET")
 
 	http.ListenAndServe(":3001", router)
 }
