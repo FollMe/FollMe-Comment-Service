@@ -14,8 +14,9 @@ type ApplicationContext struct {
 func NewApp() *ApplicationContext {
 	db := database.ConnectDB()
 	cmtRepo := repository.NewCommentRepo(db)
-	cmtSvc := service.NewCommentSvc(cmtRepo)
-	cmtHandler := handler.NewCmtHandler(cmtSvc)
+	wsSvc := service.NewWebSocketService()
+	cmtSvc := service.NewCommentSvc(cmtRepo, wsSvc)
+	cmtHandler := handler.NewCmtHandler(cmtSvc, wsSvc)
 
 	return &ApplicationContext{
 		CmtHandler: cmtHandler,

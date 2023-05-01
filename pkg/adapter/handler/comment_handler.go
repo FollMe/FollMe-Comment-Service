@@ -4,20 +4,26 @@ import (
 	"encoding/json"
 	"follme/comment-service/pkg/adapter/serializer"
 	"follme/comment-service/pkg/model"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 )
 
 type CmtHandler struct {
 	cmtSvc model.CommentSvc
+	wsSvc  model.WebSocketSvc
 }
 
-func NewCmtHandler(c model.CommentSvc) *CmtHandler {
+func NewCmtHandler(c model.CommentSvc, ws model.WebSocketSvc) *CmtHandler {
 	return &CmtHandler{
 		cmtSvc: c,
+		wsSvc:  ws,
 	}
 }
+
+var upgrader = websocket.Upgrader{}
 
 func (h CmtHandler) GetCommentsOfPost(w http.ResponseWriter, r *http.Request) {
 	postId := mux.Vars(r)["postId"]
@@ -70,7 +76,7 @@ func (h CmtHandler) CreateCommentsOfPost(w http.ResponseWriter, r *http.Request)
 
 	user := r.Context().Value("UserInfo").(*model.User)
 
-	_, err = h.cmtSvc.InsertCommentOfPost(r.Context(), model.CreateCommentOpts{
+	cmt, err := h.cmtSvc.InsertCommentOfPost(r.Context(), model.CreateCommentOpts{
 		PostSlug: req.PostSlug,
 		ParentId: req.ParentId,
 		Content:  req.Content,
@@ -82,6 +88,20 @@ func (h CmtHandler) CreateCommentsOfPost(w http.ResponseWriter, r *http.Request)
 	}
 
 	json.NewEncoder(w).Encode(
-		serializer.NewSuccessHttpRes("Post comment successful", nil),
+		serializer.NewSuccessHttpRes("Post comment successful", serializer.CreateCommentOfPostRes{
+			ID: cmt.ID(),
+		}),
 	)
+}
+
+func (h *CmtHandler) StartWSConnection(w http.ResponseWriter, r *http.Request) {
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		panic(err)
+	}
+	defer ws.Close()
+	log.Println("Connected")
+	h.wsSvc.HandleConnection(ws)
+	log.Println("Disconnected")
 }

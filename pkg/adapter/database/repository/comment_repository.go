@@ -107,12 +107,22 @@ func (c CommentRepo) List(ctx context.Context, opts model.ListOpts) ([]model.Com
 }
 
 func (c CommentRepo) CreateOne(ctx context.Context, opts model.Comment) (*model.Comment, error) {
-	query := "insert into comment (post_slug, parent_id, author, content) values ($1, $2, $3, $4)"
-	_, err := c.DB.ExecContext(ctx, query, opts.PostSlug(), opts.ParentID(), opts.Author(), opts.Content())
-
+	var (
+		commentId int
+		createdAt *time.Time
+	)
+	query := "insert into comment (post_slug, parent_id, author, content) values ($1, $2, $3, $4) returning id, created_at"
+	err := c.DB.QueryRowContext(ctx, query, opts.PostSlug(), opts.ParentID(), opts.Author(), opts.Content()).Scan(&commentId, &createdAt)
 	if err != nil {
 		return nil, err
 	}
 
-	return &opts, nil
+	return model.CommentFactory(model.CommentFactoryOpts{
+		ID:        commentId,
+		PostSlug:  opts.PostSlug(),
+		ParentId:  opts.ParentID(),
+		Author:    opts.Author(),
+		Content:   opts.Content(),
+		CreatedAt: createdAt,
+	}), nil
 }

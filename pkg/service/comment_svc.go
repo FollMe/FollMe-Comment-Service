@@ -6,12 +6,14 @@ import (
 )
 
 type CommentSvc struct {
-	repo model.CommentRepo
+	repo  model.CommentRepo
+	wsSvc model.WebSocketSvc
 }
 
-func NewCommentSvc(repo model.CommentRepo) *CommentSvc {
+func NewCommentSvc(repo model.CommentRepo, wsSvc model.WebSocketSvc) *CommentSvc {
 	return &CommentSvc{
-		repo: repo,
+		repo:  repo,
+		wsSvc: wsSvc,
 	}
 }
 
@@ -25,5 +27,10 @@ func (c CommentSvc) GetCommentsOfPost(ctx context.Context, postSlug string) ([]m
 
 func (c CommentSvc) InsertCommentOfPost(ctx context.Context, opts model.CreateCommentOpts) (*model.Comment, error) {
 	cmt := model.NewComment(opts)
-	return c.repo.CreateOne(ctx, *cmt)
+	cmt, err := c.repo.CreateOne(ctx, *cmt)
+	if err != nil {
+		return nil, err
+	}
+	c.wsSvc.BroadCastToPostRoom(cmt)
+	return cmt, nil
 }
