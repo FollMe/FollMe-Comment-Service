@@ -12,7 +12,7 @@ import (
 
 func AuthenticationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		if req.URL.Path == "/comment-svc/api/ws" {
+		if req.URL.Path == "/comment-svc/ws" {
 			next.ServeHTTP(w, req)
 		}
 		userInfos := req.Header["X-User-Info"]
