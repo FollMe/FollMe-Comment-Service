@@ -12,6 +12,9 @@ import (
 
 func AuthenticationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if req.URL.Path == "/comment-svc/api/ws" {
+			next.ServeHTTP(w, req)
+		}
 		userInfos := req.Header["X-User-Info"]
 		w.Header().Set("Content-Type", "application/json")
 		if len(userInfos) <= 0 {

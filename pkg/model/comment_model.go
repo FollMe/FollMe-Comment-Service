@@ -63,6 +63,7 @@ type ListOpts struct {
 type CommentFactoryOpts struct {
 	ID        int
 	PostSlug  string
+	ParentId  *int
 	Replies   []Comment
 	Author    string
 	Content   string
@@ -74,6 +75,7 @@ func CommentFactory(co CommentFactoryOpts) *Comment {
 	rp := Comment{
 		id:        co.ID,
 		postSlug:  co.PostSlug,
+		parentId:  co.ParentId,
 		replies:   co.Replies,
 		author:    co.Author,
 		content:   co.Content,
@@ -85,10 +87,10 @@ func CommentFactory(co CommentFactoryOpts) *Comment {
 }
 
 type CreateCommentOpts struct {
-	PostSlug string
-	ParentId *int
-	Content  string
-	Author   string
+	PostSlug string `json:"postSlug,omitempty"`
+	ParentId *int   `json:"parentId"`
+	Content  string `json:"content"`
+	Author   string `json:"author"`
 }
 
 func NewComment(opts CreateCommentOpts) *Comment {
