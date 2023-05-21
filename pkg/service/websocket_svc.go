@@ -48,12 +48,7 @@ func (s WebSocketService) HandleConnection(ws *websocket.Conn) {
 		case model.JoinPost:
 			connPool[connId].postId = message.Message
 		case model.TypingCmtPost:
-			// TODO: here
-		}
-
-		// send message from server
-		if err := ws.WriteJSON(message); err != nil {
-			log.Printf("error occurred: %v", err)
+			broadCastTyping(connPool[connId].postId, connPool[connId].userId)
 		}
 	}
 }
@@ -75,6 +70,22 @@ func (s WebSocketService) BroadCastToPostRoom(cmt *model.Comment) {
 	}
 	for _, connect := range connPool {
 		if connect.postId != cmt.PostSlug() {
+			continue
+		}
+
+		// send message from server
+		if err := connect.conn.WriteJSON(message); err != nil {
+			log.Printf("error occurred: %v", err)
+		}
+	}
+}
+
+func broadCastTyping(postId string, emitter string) {
+	message := model.Message{
+		Action: model.TypingCmtPost,
+	}
+	for _, connect := range connPool {
+		if connect.userId == emitter || connect.postId != postId {
 			continue
 		}
 
