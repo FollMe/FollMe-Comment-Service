@@ -28,3 +28,20 @@ func (h CommitDateHandler) GetCommitDate(w http.ResponseWriter, r *http.Request)
 
 	json.NewEncoder(w).Encode(serializer.NewSuccessHttpRes("", commitDate))
 }
+
+func (h CommitDateHandler) UpdateCommitDate(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	var req serializer.UpdateCommitDateReq
+	err := json.NewDecoder(r.Body).Decode(&req)
+	defer r.Body.Close()
+	if err != nil {
+		panic(err)
+	}
+
+	err = h.commitDateSvc.UpdateCommitDate(r.Context(), id, req.Date)
+	if err != nil {
+		panic(err)
+	}
+
+	json.NewEncoder(w).Encode(serializer.NewSuccessHttpRes("", nil))
+}

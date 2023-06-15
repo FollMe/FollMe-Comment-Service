@@ -20,6 +20,7 @@ func Route() {
 
 	// Commit date
 	router.HandleFunc(BaseUrl+"/commit-date/{id}", app.CommitDateHandler.GetCommitDate).Methods("GET")
+	router.HandleFunc(BaseUrl+"/commit-date/{id}", app.CommitDateHandler.UpdateCommitDate).Methods("POST")
 
 	http.ListenAndServe(":3000", router)
 }

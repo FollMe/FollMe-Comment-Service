@@ -13,8 +13,10 @@ type CommitDate struct {
 
 type CommitDateRepo interface {
 	Get(ctx context.Context, id string) (*CommitDate, error)
+	UpdateCommitDate(ctx context.Context, id string, commitDate time.Time) error
 }
 
 type CommitDateSvc interface {
 	GetCommitDate(ctx context.Context, id string) (*CommitDate, error)
+	UpdateCommitDate(ctx context.Context, id string, commitDate time.Time) error
 }

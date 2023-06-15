@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"follme/comment-service/pkg/model"
 )
@@ -40,4 +41,14 @@ func (c CommitDateRepo) Get(ctx context.Context, id string) (*model.CommitDate, 
 	}
 
 	return &commitDate, nil
+}
+
+func (c CommitDateRepo) UpdateCommitDate(ctx context.Context, id string, commitDate time.Time) error {
+	query := "update commit_date set date = $1 where id = $2"
+	_, err := c.DB.Exec(query, commitDate, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
