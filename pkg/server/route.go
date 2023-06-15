@@ -18,5 +18,8 @@ func Route() {
 	router.HandleFunc(BaseUrl+"/comments", app.CmtHandler.CreateCommentsOfPost).Methods("POST")
 	router.HandleFunc("/comment-svc/ws", app.CmtHandler.StartWSConnection).Methods("GET")
 
+	// Commit date
+	router.HandleFunc(BaseUrl+"/commit-date/{id}", app.CommitDateHandler.GetCommitDate).Methods("GET")
+
 	http.ListenAndServe(":3000", router)
 }

@@ -1,0 +1,20 @@
+package model
+
+import (
+	"context"
+	"time"
+)
+
+type CommitDate struct {
+	ID      int        `json:"id"`
+	Partner string     `json:"partner"`
+	Date    *time.Time `json:"commitDate"`
+}
+
+type CommitDateRepo interface {
+	Get(ctx context.Context, id string) (*CommitDate, error)
+}
+
+type CommitDateSvc interface {
+	GetCommitDate(ctx context.Context, id string) (*CommitDate, error)
+}

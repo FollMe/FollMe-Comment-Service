@@ -8,7 +8,8 @@ import (
 )
 
 type ApplicationContext struct {
-	CmtHandler *handler.CmtHandler
+	CmtHandler        *handler.CmtHandler
+	CommitDateHandler *handler.CommitDateHandler
 }
 
 func NewApp() *ApplicationContext {
@@ -17,8 +18,12 @@ func NewApp() *ApplicationContext {
 	wsSvc := service.NewWebSocketService()
 	cmtSvc := service.NewCommentSvc(cmtRepo, wsSvc)
 	cmtHandler := handler.NewCmtHandler(cmtSvc, wsSvc)
+	commitDateRepo := repository.NewCommitDateRepo(db)
+	commitDateSvc := service.NewCommitDateSvc(commitDateRepo)
+	commitDateHandler := handler.NewCommitDateHandler(commitDateSvc)
 
 	return &ApplicationContext{
-		CmtHandler: cmtHandler,
+		CmtHandler:        cmtHandler,
+		CommitDateHandler: commitDateHandler,
 	}
 }
