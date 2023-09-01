@@ -94,6 +94,28 @@ func (h CmtHandler) CreateCommentsOfPost(w http.ResponseWriter, r *http.Request)
 	)
 }
 
+func (h CmtHandler) GetNumberCommentsOfPosts(w http.ResponseWriter, r *http.Request) {
+	var req serializer.GetNumberCommentsOfPostsReq
+	err := json.NewDecoder(r.Body).Decode(&req)
+	defer r.Body.Close()
+	if err != nil {
+		panic(err)
+	}
+
+	serializer.ValidateOrPanic(w, req)
+
+	result, err := h.cmtSvc.GetNumberCommentsOfPosts(r.Context(), req.PostSlugs)
+	if err != nil {
+		panic(err)
+	}
+
+	json.NewEncoder(w).Encode(
+		serializer.NewSuccessHttpRes("", map[string]interface{}{
+			"numsOfCmt": result,
+		}),
+	)
+}
+
 func (h *CmtHandler) StartWSConnection(w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	ws, err := upgrader.Upgrade(w, r, nil)

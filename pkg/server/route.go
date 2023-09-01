@@ -16,6 +16,7 @@ func Route() {
 	router.Use(middleware.FilterPanicMiddleware)
 	router.HandleFunc(BaseUrl+"/comments/{postId}", app.CmtHandler.GetCommentsOfPost).Methods("GET")
 	router.HandleFunc(BaseUrl+"/comments", app.CmtHandler.CreateCommentsOfPost).Methods("POST")
+	router.HandleFunc(BaseUrl+"/comments/count", app.CmtHandler.GetNumberCommentsOfPosts).Methods("POST")
 	router.HandleFunc("/comment-svc/ws", app.CmtHandler.StartWSConnection).Methods("GET")
 
 	// Commit date

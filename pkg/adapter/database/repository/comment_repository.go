@@ -3,9 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"time"
-
 	"follme/comment-service/pkg/model"
+	"time"
 )
 
 type comment struct {
@@ -125,4 +124,43 @@ func (c CommentRepo) CreateOne(ctx context.Context, opts model.Comment) (*model.
 		Content:   opts.Content(),
 		CreatedAt: createdAt,
 	}), nil
+}
+
+func (c CommentRepo) GetNumberRecord(ctx context.Context, postSlugs []string) (map[string]int, error) {
+	result := map[string]int{}
+	if len(postSlugs) <= 0 {
+		return result, nil
+	}
+	query := "select post_slug, count(*) from comment where post_slug in (" +
+		buildParamsStruct(len(postSlugs)) +
+		") group by post_slug"
+
+	args := []interface{}{}
+
+	for _, v := range postSlugs {
+		args = append(args, v)
+	}
+	rows, err := c.DB.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			postSlug    string
+			numberOfCmt int
+		)
+		err := rows.Scan(&postSlug, &numberOfCmt)
+		if err != nil {
+			return nil, err
+		}
+
+		result[postSlug] = numberOfCmt
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

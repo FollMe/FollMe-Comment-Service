@@ -48,11 +48,13 @@ func (c *Comment) AppendReply(replyCmt Comment) {
 type CommentRepo interface {
 	List(ctx context.Context, opts ListOpts) ([]Comment, error)
 	CreateOne(ctx context.Context, opts Comment) (*Comment, error)
+	GetNumberRecord(ctx context.Context, postSlugs []string) (map[string]int, error)
 }
 
 type CommentSvc interface {
 	GetCommentsOfPost(ctx context.Context, postId string) ([]Comment, error)
 	InsertCommentOfPost(ctx context.Context, opts CreateCommentOpts) (*Comment, error)
+	GetNumberCommentsOfPosts(ctx context.Context, postSlugs []string) (map[string]int, error)
 }
 
 type ListOpts struct {

@@ -28,3 +28,7 @@ type CreateCommentOfPostReq struct {
 type CreateCommentOfPostRes struct {
 	ID int `json:"id"`
 }
+
+type GetNumberCommentsOfPostsReq struct {
+	PostSlugs []string `json:"postSlugs" validate:"required"`
+}
