@@ -49,6 +49,8 @@ func (s WebSocketService) HandleConnection(ws *websocket.Conn) {
 			connPool[connId].postId = message.Message
 		case model.TypingCmtPost:
 			broadCastTyping(connPool[connId].postId, connPool[connId].userId)
+		case model.RecoverState:
+			recoverState(connId, message.Message)
 		}
 	}
 }
@@ -94,4 +96,14 @@ func broadCastTyping(postId string, emitter string) {
 			log.Printf("error occurred: %v", err)
 		}
 	}
+}
+
+func recoverState(connId string, message string) {
+	actions := model.ClientAction{}
+	err := json.Unmarshal([]byte(message), &actions)
+	if err != nil {
+		return
+	}
+	connPool[connId].userId = actions.Join
+	connPool[connId].postId = actions.JoinPost
 }

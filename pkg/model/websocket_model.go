@@ -14,10 +14,16 @@ const (
 	JoinPost      = "join_post"
 	TypingCmtPost = "typing_cmt_post"
 	Commented     = "commented"
+	RecoverState  = "recover_state"
 )
 
 type Message struct {
 	UserID  string `json:"userId"`
 	Action  string `json:"action"`
 	Message string `json:"message"`
+}
+
+type ClientAction struct {
+	Join     string `json:"join,omitempty"`
+	JoinPost string `json:"join_post,omitempty"`
 }
