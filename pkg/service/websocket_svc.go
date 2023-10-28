@@ -5,6 +5,7 @@ import (
 	"follme/comment-service/pkg/adapter/serializer"
 	"follme/comment-service/pkg/model"
 	"log"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
@@ -32,6 +33,7 @@ func (s WebSocketService) HandleConnection(ws *websocket.Conn) {
 		conn: ws,
 	}
 
+	ws.SetReadDeadline(time.Now().Add(15 * time.Second))
 	for {
 		var message model.Message
 		err := ws.ReadJSON(&message)
@@ -40,8 +42,8 @@ func (s WebSocketService) HandleConnection(ws *websocket.Conn) {
 			log.Printf("error occurred: %v", err)
 			break
 		}
-
 		log.Println(message)
+		ws.SetReadDeadline(time.Now().Add(15 * time.Second))
 		switch message.Action {
 		case model.Join:
 			connPool[connId].userId = message.Message
