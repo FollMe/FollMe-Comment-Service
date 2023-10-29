@@ -5,6 +5,7 @@ import (
 	"follme/comment-service/pkg/adapter/serializer"
 	"follme/comment-service/pkg/model"
 	"log"
+	"math/rand"
 	"time"
 
 	"github.com/google/uuid"
@@ -14,6 +15,18 @@ import (
 type WebSocketService struct{}
 
 func NewWebSocketService() *WebSocketService {
+	go func() {
+		message := model.Message{
+			Action: model.Ping,
+		}
+		for {
+			for _, connection := range connPool {
+				log.Print("Ping")
+				connection.conn.WriteJSON(message)
+			}
+			time.Sleep(30 * time.Second)
+		}
+	}()
 	return &WebSocketService{}
 }
 
@@ -33,7 +46,8 @@ func (s WebSocketService) HandleConnection(ws *websocket.Conn) {
 		conn: ws,
 	}
 
-	ws.SetReadDeadline(time.Now().Add(15 * time.Second))
+	ws.SetReadDeadline(time.Now().Add(time.Duration(35000+rand.Intn(1000)) * time.Millisecond))
+
 	for {
 		var message model.Message
 		err := ws.ReadJSON(&message)
@@ -43,7 +57,9 @@ func (s WebSocketService) HandleConnection(ws *websocket.Conn) {
 			break
 		}
 		log.Println(message)
-		ws.SetReadDeadline(time.Now().Add(15 * time.Second))
+
+		ws.SetReadDeadline(time.Now().Add(time.Duration(35000+rand.Intn(1000)) * time.Millisecond))
+
 		switch message.Action {
 		case model.Join:
 			connPool[connId].userId = message.Message

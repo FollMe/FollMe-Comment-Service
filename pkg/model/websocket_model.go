@@ -15,6 +15,7 @@ const (
 	TypingCmtPost = "typing_cmt_post"
 	Commented     = "commented"
 	RecoverState  = "recover_state"
+	Ping          = "ping"
 )
 
 type Message struct {
