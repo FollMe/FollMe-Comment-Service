@@ -3,8 +3,8 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"follme/comment-service/pkg/config"
 	"log"
-	"os"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -17,11 +17,11 @@ func ConnectDB() *sql.DB {
 		log.Print("Loading variable from .env file")
 	}
 	var (
-		host     = os.Getenv("DB_HOST")
-		dbName   = os.Getenv("DB_NAME")
-		username = os.Getenv("DB_USERNAME")
-		password = os.Getenv("DB_PASSWORD")
-		port     = os.Getenv("DB_PORT")
+		host     = config.AppConfig.DB_HOST
+		dbName   = config.AppConfig.DB_NAME
+		username = config.AppConfig.DB_USERNAME
+		password = config.AppConfig.DB_PASSWORD
+		port     = config.AppConfig.DB_PORT
 	)
 	// Generate connection string.
 	connectionString := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",

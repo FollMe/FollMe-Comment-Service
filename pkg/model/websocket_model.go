@@ -10,6 +10,7 @@ type WebSocketSvc interface {
 }
 
 const (
+	Authenticate  = "authenticate"
 	Join          = "join"
 	JoinPost      = "join_post"
 	TypingCmtPost = "typing_cmt_post"

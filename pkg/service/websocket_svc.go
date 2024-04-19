@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"follme/comment-service/pkg/adapter/serializer"
+	"follme/comment-service/pkg/config"
 	"follme/comment-service/pkg/model"
 	"log"
 	"math/rand"
@@ -42,11 +43,8 @@ var _ model.WebSocketSvc = &WebSocketService{}
 
 func (s WebSocketService) HandleConnection(ws *websocket.Conn) {
 	connId := string(uuid.New().String())
-	connPool[connId] = &connect{
-		conn: ws,
-	}
 
-	ws.SetReadDeadline(time.Now().Add(time.Duration(35000+rand.Intn(1000)) * time.Millisecond))
+	ws.SetReadDeadline(time.Now().Add(time.Duration(2) * time.Second))
 
 	for {
 		var message model.Message
@@ -58,7 +56,9 @@ func (s WebSocketService) HandleConnection(ws *websocket.Conn) {
 		}
 		log.Println(message)
 
-		ws.SetReadDeadline(time.Now().Add(time.Duration(35000+rand.Intn(1000)) * time.Millisecond))
+		if ok := authenticate(connId, ws, &message); !ok || message.Action == model.Authenticate {
+			continue
+		}
 
 		switch message.Action {
 		case model.Join:
@@ -124,4 +124,21 @@ func recoverState(connId string, message string) {
 	}
 	connPool[connId].userId = actions.Join
 	connPool[connId].postId = actions.JoinPost
+}
+
+func authenticate(connId string, ws *websocket.Conn, message *model.Message) bool {
+	if message.Action == model.Authenticate && message.Message == config.AppConfig.WSToken {
+		connPool[connId] = &connect{
+			conn: ws,
+		}
+		log.Printf("connId %v authenticated successfully!", connId)
+	}
+
+	if _, ok := connPool[connId]; !ok {
+		log.Printf("connId %v authenticated fail!", connId)
+		return false
+	}
+
+	ws.SetReadDeadline(time.Now().Add(time.Duration(35000+rand.Intn(1000)) * time.Millisecond))
+	return true
 }
