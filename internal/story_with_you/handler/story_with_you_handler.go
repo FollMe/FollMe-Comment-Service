@@ -2,20 +2,20 @@ package handler
 
 import (
 	"encoding/json"
+	"follme/comment-service/internal/story_with_you/domain"
 	"follme/comment-service/pkg/adapter/serializer"
-	"follme/comment-service/pkg/model"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
 type CommitDateHandler struct {
-	commitDateSvc model.CommitDateSvc
+	commitDateSvc domain.CommitDateSvc
 }
 
-func NewCommitDateHandler(c model.CommitDateSvc) *CommitDateHandler {
+func NewStoryWithYouHandler(commitDateSvc domain.CommitDateSvc) *CommitDateHandler {
 	return &CommitDateHandler{
-		commitDateSvc: c,
+		commitDateSvc: commitDateSvc,
 	}
 }
 
@@ -31,7 +31,7 @@ func (h CommitDateHandler) GetCommitDate(w http.ResponseWriter, r *http.Request)
 
 func (h CommitDateHandler) UpdateCommitDate(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
-	var req serializer.UpdateCommitDateReq
+	var req domain.UpdateCommitDateReq
 	err := json.NewDecoder(r.Body).Decode(&req)
 	defer r.Body.Close()
 	if err != nil {

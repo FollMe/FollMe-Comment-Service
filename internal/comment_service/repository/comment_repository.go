@@ -3,7 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"follme/comment-service/pkg/model"
+	"follme/comment-service/internal/comment_service/domain"
+	repo_helper "follme/comment-service/pkg/repository_helper"
 	"time"
 )
 
@@ -36,10 +37,10 @@ func NewCommentRepo(db *sql.DB) *CommentRepo {
 	}
 }
 
-var _ model.CommentRepo = &CommentRepo{}
+var _ domain.CommentRepo = &CommentRepo{}
 
-func (c comment) toModel() *model.Comment {
-	return model.CommentFactory(model.CommentFactoryOpts{
+func (c comment) toModel() *domain.Comment {
+	return domain.CommentFactory(domain.CommentFactoryOpts{
 		ID:        c.ID,
 		PostSlug:  c.PostSlug,
 		Author:    c.Author,
@@ -49,8 +50,8 @@ func (c comment) toModel() *model.Comment {
 	})
 }
 
-func (c replyComment) toModel() *model.Comment {
-	return model.CommentFactory(model.CommentFactoryOpts{
+func (c replyComment) toModel() *domain.Comment {
+	return domain.CommentFactory(domain.CommentFactoryOpts{
 		ID:        *c.ID,
 		Author:    *c.Author,
 		Content:   *c.Content,
@@ -59,7 +60,7 @@ func (c replyComment) toModel() *model.Comment {
 	})
 }
 
-func (c CommentRepo) List(ctx context.Context, opts model.ListOpts) ([]model.Comment, error) {
+func (c CommentRepo) List(ctx context.Context, opts domain.ListOpts) ([]domain.Comment, error) {
 	query := `
 		select c.id, c.post_slug, c.author, c.content, c.created_at, c.updated_at,
 		rc.id, rc.author, rc.content, rc.created_at, rc.updated_at
@@ -67,7 +68,7 @@ func (c CommentRepo) List(ctx context.Context, opts model.ListOpts) ([]model.Com
 		where c.post_slug = $1 and c.parent_id is null
 		order by c.id ASC, rc.id ASC 
 	`
-	cmts := []model.Comment{}
+	cmts := []domain.Comment{}
 	rows, err := c.DB.Query(query, opts.PostSlug)
 	if err != nil {
 		return nil, err
@@ -105,7 +106,7 @@ func (c CommentRepo) List(ctx context.Context, opts model.ListOpts) ([]model.Com
 	return cmts, nil
 }
 
-func (c CommentRepo) CreateOne(ctx context.Context, opts model.Comment) (*model.Comment, error) {
+func (c CommentRepo) CreateOne(ctx context.Context, opts domain.Comment) (*domain.Comment, error) {
 	var (
 		commentId int
 		createdAt *time.Time
@@ -116,7 +117,7 @@ func (c CommentRepo) CreateOne(ctx context.Context, opts model.Comment) (*model.
 		return nil, err
 	}
 
-	return model.CommentFactory(model.CommentFactoryOpts{
+	return domain.CommentFactory(domain.CommentFactoryOpts{
 		ID:        commentId,
 		PostSlug:  opts.PostSlug(),
 		ParentId:  opts.ParentID(),
@@ -132,7 +133,7 @@ func (c CommentRepo) GetNumberRecord(ctx context.Context, postSlugs []string) (m
 		return result, nil
 	}
 	query := "select post_slug, count(*) from comment where post_slug in (" +
-		buildParamsStruct(len(postSlugs)) +
+		repo_helper.BuildParamsStruct(len(postSlugs)) +
 		") group by post_slug"
 
 	args := []interface{}{}

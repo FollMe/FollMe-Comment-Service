@@ -2,23 +2,23 @@ package service
 
 import (
 	"context"
-	"follme/comment-service/pkg/model"
+	"follme/comment-service/internal/story_with_you/domain"
 	"time"
 )
 
 type CommitDateSvc struct {
-	repo model.CommitDateRepo
+	repo domain.CommitDateRepo
 }
 
-func NewCommitDateSvc(repo model.CommitDateRepo) *CommitDateSvc {
+func NewCommitDateSvc(repo domain.CommitDateRepo) *CommitDateSvc {
 	return &CommitDateSvc{
 		repo: repo,
 	}
 }
 
-var _ model.CommitDateSvc = &CommitDateSvc{}
+var _ domain.CommitDateSvc = &CommitDateSvc{}
 
-func (c CommitDateSvc) GetCommitDate(ctx context.Context, id string) (*model.CommitDate, error) {
+func (c CommitDateSvc) GetCommitDate(ctx context.Context, id string) (*domain.CommitDate, error) {
 	return c.repo.Get(ctx, id)
 }
 

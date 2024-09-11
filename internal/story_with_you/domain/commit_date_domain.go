@@ -1,4 +1,4 @@
-package model
+package domain
 
 import (
 	"context"
@@ -19,4 +19,8 @@ type CommitDateRepo interface {
 type CommitDateSvc interface {
 	GetCommitDate(ctx context.Context, id string) (*CommitDate, error)
 	UpdateCommitDate(ctx context.Context, id string, commitDate time.Time) error
+}
+
+type UpdateCommitDateReq struct {
+	Date time.Time `json:"date" validate:"required"`
 }

@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"time"
 
-	"follme/comment-service/pkg/model"
+	"follme/comment-service/internal/story_with_you/domain"
 )
 
 type CommitDateRepo struct {
@@ -18,16 +18,16 @@ func NewCommitDateRepo(db *sql.DB) *CommitDateRepo {
 	}
 }
 
-var _ model.CommitDateRepo = &CommitDateRepo{}
+var _ domain.CommitDateRepo = &CommitDateRepo{}
 
-func (c CommitDateRepo) Get(ctx context.Context, id string) (*model.CommitDate, error) {
+func (c CommitDateRepo) Get(ctx context.Context, id string) (*domain.CommitDate, error) {
 	query := `
 		select id, partner, date
 		from commit_date
 		where id = $1
 	`
 
-	var commitDate model.CommitDate
+	var commitDate domain.CommitDate
 
 	row := c.DB.QueryRow(query, id)
 

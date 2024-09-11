@@ -1,7 +1,7 @@
 package main
 
 import (
-	"follme/comment-service/pkg/server"
+	server "follme/comment-service/internal/app"
 )
 
 func main() {
