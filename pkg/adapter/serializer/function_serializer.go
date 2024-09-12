@@ -23,3 +23,15 @@ func ValidateOrPanic(w http.ResponseWriter, obj interface{}) {
 		panic(nil)
 	}
 }
+
+func ResponseJSON(w http.ResponseWriter) func(body interface{}, statusCode_optional ...int) {
+	return func(body interface{}, statusCode_optional ...int) {
+		statusCode := http.StatusOK
+		if len(statusCode_optional) > 0 {
+			statusCode = statusCode_optional[0]
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(statusCode)
+		json.NewEncoder(w).Encode(body)
+	}
+}

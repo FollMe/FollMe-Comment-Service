@@ -26,7 +26,7 @@ func (h CommitDateHandler) GetCommitDate(w http.ResponseWriter, r *http.Request)
 		panic(err)
 	}
 
-	json.NewEncoder(w).Encode(serializer.NewSuccessHttpRes("", commitDate))
+	serializer.ResponseJSON(w)(serializer.NewSuccessHttpRes("", commitDate))
 }
 
 func (h CommitDateHandler) UpdateCommitDate(w http.ResponseWriter, r *http.Request) {
@@ -43,5 +43,5 @@ func (h CommitDateHandler) UpdateCommitDate(w http.ResponseWriter, r *http.Reque
 		panic(err)
 	}
 
-	json.NewEncoder(w).Encode(serializer.NewSuccessHttpRes("", nil))
+	serializer.ResponseJSON(w)(serializer.NewSuccessHttpRes("", nil))
 }

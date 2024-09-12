@@ -57,7 +57,7 @@ func (h CmtHandler) GetCommentsOfPost(w http.ResponseWriter, r *http.Request) {
 		cmtsRes = append(cmtsRes, cmtRes)
 	}
 
-	json.NewEncoder(w).Encode(
+	serializer.ResponseJSON(w)(
 		serializer.NewSuccessHttpRes("", serializer.GetCommentsOfPostRes{
 			Comments: cmtsRes,
 		}),
@@ -87,7 +87,7 @@ func (h CmtHandler) CreateCommentsOfPost(w http.ResponseWriter, r *http.Request)
 		panic(err)
 	}
 
-	json.NewEncoder(w).Encode(
+	serializer.ResponseJSON(w)(
 		serializer.NewSuccessHttpRes("Post comment successful", serializer.CreateCommentOfPostRes{
 			ID: cmt.ID(),
 		}),
@@ -109,7 +109,7 @@ func (h CmtHandler) GetNumberCommentsOfPosts(w http.ResponseWriter, r *http.Requ
 		panic(err)
 	}
 
-	json.NewEncoder(w).Encode(
+	serializer.ResponseJSON(w)(
 		serializer.NewSuccessHttpRes("", map[string]interface{}{
 			"numsOfCmt": result,
 		}),

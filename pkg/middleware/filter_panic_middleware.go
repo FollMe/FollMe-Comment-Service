@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"encoding/json"
 	"follme/comment-service/pkg/adapter/serializer"
 	"log"
 
@@ -13,10 +12,7 @@ func FilterPanicMiddleware(next http.Handler) http.Handler {
 		defer func() {
 			if r := recover(); r != nil {
 				log.Printf("Panic: %v", r)
-				w.WriteHeader(http.StatusInternalServerError)
-				json.NewEncoder(w).Encode(
-					serializer.NewFailHttpRes(""),
-				)
+				serializer.ResponseJSON(w)(serializer.NewFailHttpRes(""), http.StatusInternalServerError)
 			}
 		}()
 		next.ServeHTTP(w, req)
