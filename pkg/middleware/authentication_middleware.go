@@ -16,12 +16,8 @@ func AuthenticationMiddleware(next http.Handler) http.Handler {
 			next.ServeHTTP(w, req)
 		}
 		userInfos := req.Header["X-User-Info"]
-		w.Header().Set("Content-Type", "application/json")
 		if len(userInfos) <= 0 {
-			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(
-				serializer.NewFailHttpRes("Vui lòng đăng nhập"),
-			)
+			serializer.ResponseJSON(w)(serializer.NewFailHttpRes("Vui lòng đăng nhập"), http.StatusUnauthorized)
 			return
 		}
 

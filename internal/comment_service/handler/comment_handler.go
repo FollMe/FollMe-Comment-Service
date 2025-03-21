@@ -58,11 +58,9 @@ func (h CmtHandler) GetCommentsOfPost(w http.ResponseWriter, r *http.Request) {
 		cmtsRes = append(cmtsRes, cmtRes)
 	}
 
-	json.NewEncoder(w).Encode(
-		serializer.NewSuccessHttpRes("", domain.GetCommentsOfPostRes{
-			Comments: cmtsRes,
-		}),
-	)
+	serializer.WriteSuccessResponse(w, "", domain.GetCommentsOfPostRes{
+		Comments: cmtsRes,
+	})
 }
 
 func (h CmtHandler) CreateCommentsOfPost(w http.ResponseWriter, r *http.Request) {
@@ -88,11 +86,9 @@ func (h CmtHandler) CreateCommentsOfPost(w http.ResponseWriter, r *http.Request)
 		panic(err)
 	}
 
-	json.NewEncoder(w).Encode(
-		serializer.NewSuccessHttpRes("Post comment successful", domain.CreateCommentOfPostRes{
-			ID: cmt.ID(),
-		}),
-	)
+	serializer.WriteSuccessResponse(w, "Post comment successful", domain.CreateCommentOfPostRes{
+		ID: cmt.ID(),
+	}, http.StatusCreated)
 }
 
 func (h CmtHandler) GetNumberCommentsOfPosts(w http.ResponseWriter, r *http.Request) {
@@ -110,11 +106,9 @@ func (h CmtHandler) GetNumberCommentsOfPosts(w http.ResponseWriter, r *http.Requ
 		panic(err)
 	}
 
-	json.NewEncoder(w).Encode(
-		serializer.NewSuccessHttpRes("", map[string]interface{}{
-			"numsOfCmt": result,
-		}),
-	)
+	serializer.WriteSuccessResponse(w, "", map[string]interface{}{
+		"numsOfCmt": result,
+	})
 }
 
 func (h *CmtHandler) StartWSConnection(w http.ResponseWriter, r *http.Request) {

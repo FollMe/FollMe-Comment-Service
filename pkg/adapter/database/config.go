@@ -24,7 +24,7 @@ func ConnectDB() *sql.DB {
 		port     = config.AppConfig.DB_PORT
 	)
 	// Generate connection string.
-	connectionString := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+	connectionString := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=require",
 		host, port, username, password, dbName,
 	)
 
