@@ -2,9 +2,7 @@ package service
 
 import (
 	"encoding/json"
-	"follme/comment-service/pkg/adapter/serializer"
-	"follme/comment-service/pkg/config"
-	"follme/comment-service/pkg/model"
+	"follme/comment-service/internal/comment_service/domain"
 	"log"
 	"math/rand"
 	"time"
@@ -13,12 +11,14 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type WebSocketService struct{}
+type WebSocketService struct {
+	wsToken string
+}
 
-func NewWebSocketService() *WebSocketService {
+func NewWebSocketService(wsToken string) *WebSocketService {
 	go func() {
-		message := model.Message{
-			Action: model.Ping,
+		message := domain.Message{
+			Action: domain.Ping,
 		}
 		for {
 			for _, connection := range connPool {
@@ -28,7 +28,9 @@ func NewWebSocketService() *WebSocketService {
 			time.Sleep(30 * time.Second)
 		}
 	}()
-	return &WebSocketService{}
+	return &WebSocketService{
+		wsToken: wsToken,
+	}
 }
 
 type connect struct {
@@ -39,7 +41,7 @@ type connect struct {
 
 var connPool map[string]*connect = map[string]*connect{}
 
-var _ model.WebSocketSvc = &WebSocketService{}
+var _ domain.WebSocketSvc = &WebSocketService{}
 
 func (s WebSocketService) HandleConnection(ws *websocket.Conn) {
 	connId := string(uuid.New().String())
@@ -47,7 +49,7 @@ func (s WebSocketService) HandleConnection(ws *websocket.Conn) {
 	ws.SetReadDeadline(time.Now().Add(time.Duration(2) * time.Second))
 
 	for {
-		var message model.Message
+		var message domain.Message
 		err := ws.ReadJSON(&message)
 		if err != nil {
 			delete(connPool, connId)
@@ -56,26 +58,26 @@ func (s WebSocketService) HandleConnection(ws *websocket.Conn) {
 		}
 		log.Println(message)
 
-		if ok := authenticate(connId, ws, &message); !ok || message.Action == model.Authenticate {
+		if ok := s.authenticate(connId, ws, &message); !ok || message.Action == domain.Authenticate {
 			continue
 		}
 
 		switch message.Action {
-		case model.Join:
+		case domain.Join:
 			connPool[connId].userId = message.Message
-		case model.JoinPost:
+		case domain.JoinPost:
 			connPool[connId].postId = message.Message
-		case model.TypingCmtPost:
+		case domain.TypingCmtPost:
 			broadCastTyping(connPool[connId].postId, connPool[connId].userId)
-		case model.RecoverState:
+		case domain.RecoverState:
 			recoverState(connId, message.Message)
 		}
 	}
 }
 
-func (s WebSocketService) BroadCastToPostRoom(cmt *model.Comment) {
+func (s WebSocketService) BroadCastToPostRoom(cmt *domain.Comment) {
 	log.Println("Do broadcast")
-	out, err := json.Marshal(serializer.Comment{
+	out, err := json.Marshal(domain.CommentRes{
 		ID:       cmt.ID(),
 		Content:  cmt.Content(),
 		ParentID: cmt.ParentID(),
@@ -84,8 +86,8 @@ func (s WebSocketService) BroadCastToPostRoom(cmt *model.Comment) {
 	if err != nil {
 		return
 	}
-	message := model.Message{
-		Action:  model.Commented,
+	message := domain.Message{
+		Action:  domain.Commented,
 		Message: string(out),
 	}
 	for _, connect := range connPool {
@@ -101,8 +103,8 @@ func (s WebSocketService) BroadCastToPostRoom(cmt *model.Comment) {
 }
 
 func broadCastTyping(postId string, emitter string) {
-	message := model.Message{
-		Action: model.TypingCmtPost,
+	message := domain.Message{
+		Action: domain.TypingCmtPost,
 	}
 	for _, connect := range connPool {
 		if connect.userId == emitter || connect.postId != postId {
@@ -117,7 +119,7 @@ func broadCastTyping(postId string, emitter string) {
 }
 
 func recoverState(connId string, message string) {
-	actions := model.ClientAction{}
+	actions := domain.ClientAction{}
 	err := json.Unmarshal([]byte(message), &actions)
 	if err != nil {
 		return
@@ -126,8 +128,8 @@ func recoverState(connId string, message string) {
 	connPool[connId].postId = actions.JoinPost
 }
 
-func authenticate(connId string, ws *websocket.Conn, message *model.Message) bool {
-	if message.Action == model.Authenticate && message.Message == config.AppConfig.WSToken {
+func (s WebSocketService) authenticate(connId string, ws *websocket.Conn, message *domain.Message) bool {
+	if message.Action == domain.Authenticate && message.Message == s.wsToken {
 		connPool[connId] = &connect{
 			conn: ws,
 		}

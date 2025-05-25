@@ -2,8 +2,9 @@ package handler
 
 import (
 	"encoding/json"
+	"follme/comment-service/internal/comment_service/domain"
 	"follme/comment-service/pkg/adapter/serializer"
-	"follme/comment-service/pkg/model"
+	"follme/comment-service/pkg/user"
 	"log"
 	"net/http"
 
@@ -12,11 +13,11 @@ import (
 )
 
 type CmtHandler struct {
-	cmtSvc model.CommentSvc
-	wsSvc  model.WebSocketSvc
+	cmtSvc domain.CommentSvc
+	wsSvc  domain.WebSocketSvc
 }
 
-func NewCmtHandler(c model.CommentSvc, ws model.WebSocketSvc) *CmtHandler {
+func NewCmtHandler(c domain.CommentSvc, ws domain.WebSocketSvc) *CmtHandler {
 	return &CmtHandler{
 		cmtSvc: c,
 		wsSvc:  ws,
@@ -32,9 +33,9 @@ func (h CmtHandler) GetCommentsOfPost(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	cmtsRes := []serializer.Comment{}
+	cmtsRes := []domain.CommentRes{}
 	for _, cmt := range cmts {
-		cmtRes := serializer.Comment{
+		cmtRes := domain.CommentRes{
 			ID:        cmt.ID(),
 			PostSlug:  cmt.PostSlug(),
 			Author:    cmt.Author(),
@@ -42,9 +43,9 @@ func (h CmtHandler) GetCommentsOfPost(w http.ResponseWriter, r *http.Request) {
 			CreatedAt: cmt.CreatedAt(),
 			UpdatedAt: cmt.UpdatedAt(),
 		}
-		replyCmtRes := []serializer.Comment{}
+		replyCmtRes := []domain.CommentRes{}
 		for _, replyCmt := range cmt.Replies() {
-			replyCmtRes = append(replyCmtRes, serializer.Comment{
+			replyCmtRes = append(replyCmtRes, domain.CommentRes{
 				ID:        replyCmt.ID(),
 				Author:    replyCmt.Author(),
 				Content:   replyCmt.Content(),
@@ -57,15 +58,13 @@ func (h CmtHandler) GetCommentsOfPost(w http.ResponseWriter, r *http.Request) {
 		cmtsRes = append(cmtsRes, cmtRes)
 	}
 
-	serializer.ResponseJSON(w)(
-		serializer.NewSuccessHttpRes("", serializer.GetCommentsOfPostRes{
-			Comments: cmtsRes,
-		}),
-	)
+	serializer.WriteSuccessResponse(w, "", domain.GetCommentsOfPostRes{
+		Comments: cmtsRes,
+	})
 }
 
 func (h CmtHandler) CreateCommentsOfPost(w http.ResponseWriter, r *http.Request) {
-	var req serializer.CreateCommentOfPostReq
+	var req domain.CreateCommentOfPostReq
 	err := json.NewDecoder(r.Body).Decode(&req)
 	defer r.Body.Close()
 	if err != nil {
@@ -74,9 +73,9 @@ func (h CmtHandler) CreateCommentsOfPost(w http.ResponseWriter, r *http.Request)
 
 	serializer.ValidateOrPanic(w, req)
 
-	user := r.Context().Value("UserInfo").(*model.User)
+	user := r.Context().Value("UserInfo").(*user.User)
 
-	cmt, err := h.cmtSvc.InsertCommentOfPost(r.Context(), model.CreateCommentOpts{
+	cmt, err := h.cmtSvc.InsertCommentOfPost(r.Context(), domain.CreateCommentOpts{
 		PostSlug: req.PostSlug,
 		ParentId: req.ParentId,
 		Content:  req.Content,
@@ -87,15 +86,13 @@ func (h CmtHandler) CreateCommentsOfPost(w http.ResponseWriter, r *http.Request)
 		panic(err)
 	}
 
-	serializer.ResponseJSON(w)(
-		serializer.NewSuccessHttpRes("Post comment successful", serializer.CreateCommentOfPostRes{
-			ID: cmt.ID(),
-		}),
-	)
+	serializer.WriteSuccessResponse(w, "Post comment successful", domain.CreateCommentOfPostRes{
+		ID: cmt.ID(),
+	}, http.StatusCreated)
 }
 
 func (h CmtHandler) GetNumberCommentsOfPosts(w http.ResponseWriter, r *http.Request) {
-	var req serializer.GetNumberCommentsOfPostsReq
+	var req domain.GetNumberCommentsOfPostsReq
 	err := json.NewDecoder(r.Body).Decode(&req)
 	defer r.Body.Close()
 	if err != nil {
@@ -109,11 +106,9 @@ func (h CmtHandler) GetNumberCommentsOfPosts(w http.ResponseWriter, r *http.Requ
 		panic(err)
 	}
 
-	serializer.ResponseJSON(w)(
-		serializer.NewSuccessHttpRes("", map[string]interface{}{
-			"numsOfCmt": result,
-		}),
-	)
+	serializer.WriteSuccessResponse(w, "", map[string]interface{}{
+		"numsOfCmt": result,
+	})
 }
 
 func (h *CmtHandler) StartWSConnection(w http.ResponseWriter, r *http.Request) {

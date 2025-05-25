@@ -12,7 +12,10 @@ func FilterPanicMiddleware(next http.Handler) http.Handler {
 		defer func() {
 			if r := recover(); r != nil {
 				log.Printf("Panic: %v", r)
-				serializer.ResponseJSON(w)(serializer.NewFailHttpRes(""), http.StatusInternalServerError)
+				serializer.ResponseJSON(w)(
+					serializer.NewFailHttpRes(""),
+					http.StatusInternalServerError,
+				)
 			}
 		}()
 		next.ServeHTTP(w, req)

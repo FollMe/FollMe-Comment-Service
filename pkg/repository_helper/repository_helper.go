@@ -1,11 +1,11 @@
-package repository
+package repository_helper
 
 import (
 	"fmt"
 	"strings"
 )
 
-func buildParamsStruct(quantity int) string {
+func BuildParamsStruct(quantity int) string {
 	params := []string{}
 	if quantity <= 0 {
 		return ""

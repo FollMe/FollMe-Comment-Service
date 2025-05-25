@@ -1,4 +1,4 @@
-package model
+package domain
 
 import (
 	"context"
@@ -104,4 +104,33 @@ func NewComment(opts CreateCommentOpts) *Comment {
 		author:    opts.Author,
 		createdAt: now,
 	}
+}
+
+type CommentRes struct {
+	ID        int          `json:"id"`
+	PostSlug  string       `json:"postSlug,omitempty"`
+	Author    string       `json:"author"`
+	Content   string       `json:"content"`
+	ParentID  *int         `json:"parentId"`
+	Replies   []CommentRes `json:"replies,omitempty"`
+	CreatedAt time.Time    `json:"createdAt"`
+	UpdatedAt *time.Time   `json:"updatedAt"`
+}
+
+type GetCommentsOfPostRes struct {
+	Comments []CommentRes `json:"comments"`
+}
+
+type CreateCommentOfPostReq struct {
+	PostSlug string `json:"postSlug" validate:"required"`
+	ParentId *int   `json:"parentId,omitempty" validate:"omitempty,number"`
+	Content  string `json:"content" validate:"required"`
+}
+
+type CreateCommentOfPostRes struct {
+	ID int `json:"id"`
+}
+
+type GetNumberCommentsOfPostsReq struct {
+	PostSlugs []string `json:"postSlugs" validate:"required"`
 }

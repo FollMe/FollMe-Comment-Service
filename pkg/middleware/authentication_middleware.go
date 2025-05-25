@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"follme/comment-service/pkg/adapter/serializer"
-	"follme/comment-service/pkg/model"
+	"follme/comment-service/pkg/user"
 
 	"net/http"
 )
@@ -22,7 +22,7 @@ func AuthenticationMiddleware(next http.Handler) http.Handler {
 		}
 
 		decodeInfo, _ := base64.StdEncoding.DecodeString(userInfos[0])
-		user := model.User{}
+		user := user.User{}
 		err := json.Unmarshal(decodeInfo, &user)
 		if err != nil {
 			panic(err)

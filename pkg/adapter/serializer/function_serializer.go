@@ -16,9 +16,9 @@ func ValidateOrPanic(w http.ResponseWriter, obj interface{}) {
 	err := Validate(obj)
 
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(
+		ResponseJSON(w)(
 			NewFailHttpRes(err.Error()),
+			http.StatusBadRequest,
 		)
 		panic(nil)
 	}
@@ -34,4 +34,8 @@ func ResponseJSON(w http.ResponseWriter) func(body interface{}, statusCode_optio
 		w.WriteHeader(statusCode)
 		json.NewEncoder(w).Encode(body)
 	}
+}
+
+func WriteSuccessResponse(w http.ResponseWriter, message string, data interface{}, statusCode_optional ...int) {
+	ResponseJSON(w)(NewSuccessHttpRes(message, data), statusCode_optional...)
 }
